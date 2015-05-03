@@ -1,3 +1,6 @@
+# test.py
+# the main program of SNS-watchdog-test
+
 import pcap, dpkt, time
 
 def process(timestamp, pkt, undefined):
@@ -11,7 +14,7 @@ def process(timestamp, pkt, undefined):
 def init_capture():
     ''' Initializes the capture process '''
     pc = pcap.pcap(name = "wlp0s26u1u4i2", timeout_ms = 1000000000)
-    pc.setfilter('tcp')
+    pc.setfilter('tcp port 80')
     return pc
 
 def main():
