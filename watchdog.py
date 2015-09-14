@@ -4,6 +4,8 @@
 from socket import *
 import struct
 import configFile
+import timeList
+import analyzer
 
 class WatchdogInfo:
     '''basic information of watchdog'''
@@ -14,21 +16,35 @@ class WatchdogInfo:
     
     monitor_list = [] # a list containing all the hostnames to monitor
     
+    timeListDict = None # a dictionary containing all timeLists.
+    
     def __init__(self):
         
         print "\nWelcome to SNS watchdog! System initializing..."
         # gethostbyname(gethostname()) doesn't really work here...
         
+        # initializing the sockets.
         tmp_sock = socket(AF_INET, SOCK_DGRAM)
         tmp_sock.connect(("8.8.8.8", 0))
         self.local_ipaddr = tmp_sock.getsockname()[0]
         print "local ip address is %s\n" % self.local_ipaddr
         
+        # Reading the configuration file.
         self.known_ip_addr_dict = {}
         self.monitor_list = []
         configFile.parseConfigFile("config-watchdog.conf", self.monitor_list);
         
-    
+        # initializing the time lists.
+        timeListDict = timeList.TimeListDict()
+        for mEntry in self.monitor_list:
+            newTimeList = timeList.TimeList(mEntry.displayName)
+            timeListDict.addList(mEntry.displayName, newTimeList)
+        
+            
+     
+        
+
+# Alert: this is a list, not set. Efficiency is low.
 class MonitorEntry:
     '''a record entry in WatchDogInfo.monitor_list'''
     displayName = ""
@@ -38,6 +54,7 @@ class MonitorEntry:
         self.filterName = fName
     
 
+# Alert: this is not used yet, efficiency is low.
 class KnownIpEntry:
     '''a record entry in WatchDogInfo.known_ip_addr_dict
     (the 'value' part of the key-value pair in the dictionary)
@@ -60,6 +77,7 @@ def main():
         s = socket(AF_INET, SOCK_RAW, IPPROTO_TCP)
     except:
         print "Failed to open a socket!"
+        print "Did you grant Administrator permisson to me?"
         return
     
     while True:
